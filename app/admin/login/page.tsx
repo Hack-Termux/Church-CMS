@@ -5,58 +5,81 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
-  const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Login(){
 
-  async function login() {
-    try {
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+const router = useRouter();
 
-      router.push("/admin");
+const [email,setEmail] = useState("");
+const [password,setPassword] = useState("");
 
-    } catch (error) {
-      alert(error.message);
-    }
-  }
 
-  return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
+async function login(){
 
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+try{
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Admin Login
-        </h1>
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
 
-        <input
-          className="w-full border p-3 mb-4 rounded text-gray-900"
-          type="email" placeholder="Email"
-          onChange={(e)=>setEmail(e.target.value)}
-        />
+router.push("/admin");
 
-        <input
-          className="w-full border p-3 mb-4 rounded text-gray-900"
-          placeholder="Password"
-          type="password"
-          onChange={(e)=>setPassword(e.target.value)}
-        />
+}catch(error){
 
-        <button
-          onClick={login}
-          className="w-full bg-blue-700 text-white p-3 rounded"
-        >
-          Login
-        </button>
+if(error instanceof Error){
+alert(error.message);
+}else{
+alert("Login failed");
+}
 
-      </div>
+}
 
-    </main>
-  );
+}
+
+
+return(
+
+<main className="min-h-screen flex items-center justify-center bg-gray-100">
+
+<div className="bg-white p-8 rounded-xl shadow w-full max-w-md">
+
+<h1 className="text-2xl font-bold mb-6">
+Admin Login
+</h1>
+
+
+<input
+className="w-full border p-3 mb-4"
+placeholder="Email"
+type="email"
+value={email}
+onChange={(e)=>setEmail(e.target.value)}
+/>
+
+
+<input
+className="w-full border p-3 mb-4"
+placeholder="Password"
+type="password"
+value={password}
+onChange={(e)=>setPassword(e.target.value)}
+/>
+
+
+<button
+onClick={login}
+className="w-full bg-blue-700 text-white p-3 rounded"
+>
+Login
+</button>
+
+
+</div>
+
+</main>
+
+);
+
 }

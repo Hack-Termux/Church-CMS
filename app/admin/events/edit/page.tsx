@@ -1,106 +1,149 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useSearchParams, useRouter } from "next/navigation";
-import Layout from "@/components/admin/Layout";
 
 
-export default function EditEvent(){
+function EditEvent(){
 
-  const params = useSearchParams();
-  const router = useRouter();
+const params = useSearchParams();
+const router = useRouter();
 
-  const id = params.get("id");
-
-
-  const [form,setForm] = useState({
-    title:"",
-    date:"",
-    time:"",
-    location:"",
-    description:""
-  });
+const id = params.get("id");
 
 
-  useEffect(()=>{
-
-    async function load(){
-
-      if(!id) return;
-
-      const snap = await getDoc(
-        doc(db,"events",id)
-      );
-
-      if(snap.exists()){
-        setForm(snap.data() as any);
-      }
-
-    }
-
-    load();
-
-  },[id]);
+const [event,setEvent] = useState({
+title:"",
+date:"",
+description:"",
+image:""
+});
 
 
+useEffect(()=>{
 
-  async function update(){
+async function load(){
 
-    if(!id) return;
+if(!id) return;
 
-    await updateDoc(
-      doc(db,"events",id),
-      form
-    );
+const snap = await getDoc(
+doc(db,"events",id)
+);
 
-    alert("Event updated");
 
-    router.push("/admin/events");
+if(snap.exists()){
 
-  }
+setEvent(snap.data() as any);
+
+}
+
+}
+
+load();
+
+},[id]);
 
 
 
-  return(
-    <Layout>
+async function save(){
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        Edit Event
-      </h1>
+if(!id) return;
 
+await updateDoc(
+doc(db,"events",id),
+event
+);
 
-      <div className="bg-white p-6 rounded-xl shadow max-w-xl">
+alert("Event updated");
 
+router.push("/admin/events");
 
-        {Object.keys(form).map((field)=>(
-          <input
-            key={field}
-            className="w-full border p-3 mb-4 text-gray-900"
-            placeholder={field}
-            value={(form as any)[field]}
-            onChange={(e)=>
-              setForm({
-                ...form,
-                [field]:e.target.value
-              })
-            }
-          />
-        ))}
+}
 
 
-        <button
-          onClick={update}
-          className="bg-blue-700 text-white px-6 py-3 rounded"
-        >
-          Save Changes
-        </button>
+
+return(
+
+<div className="p-6">
+
+<h1 className="text-3xl font-bold mb-6">
+Edit Event
+</h1>
 
 
-      </div>
+<div className="bg-white p-6 rounded-xl shadow max-w-xl">
 
 
-    </Layout>
-  );
+<input
+className="w-full border p-3 mb-4"
+placeholder="Event title"
+value={event.title}
+onChange={(e)=>
+setEvent({...event,title:e.target.value})
+}
+/>
+
+
+<input
+className="w-full border p-3 mb-4"
+placeholder="Date"
+value={event.date}
+onChange={(e)=>
+setEvent({...event,date:e.target.value})
+}
+/>
+
+
+<textarea
+className="w-full border p-3 mb-4"
+placeholder="Description"
+value={event.description}
+onChange={(e)=>
+setEvent({...event,description:e.target.value})
+}
+/>
+
+
+<input
+className="w-full border p-3 mb-4"
+placeholder="Image URL"
+value={event.image}
+onChange={(e)=>
+setEvent({...event,image:e.target.value})
+}
+/>
+
+
+<button
+onClick={save}
+className="bg-blue-700 text-white px-6 py-3 rounded"
+>
+Save Changes
+</button>
+
+
+</div>
+
+</div>
+
+);
+
+}
+
+
+
+export default function Page(){
+
+return(
+
+<Suspense fallback={<div>Loading...</div>}>
+
+<EditEvent />
+
+</Suspense>
+
+);
+
 }
